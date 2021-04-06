@@ -1,0 +1,18 @@
+---
+title: "Natalie Boychuk Maimonides Data Analysis Submission"
+output: 
+  html_document:
+    toc: true
+    toc_float: true
+    theme: flatly
+---
+
+# Motivation 
+This website is my submission for the Digital Health Analyst at Maimonides Hospital, Brooklyn, NY. The results presented here demonstrate my data cleaning, analyses and presentation skills. 
+
+
+# What you will find on this website: 
+* A complete report including all data cleaning/analysis activities
+* A workplan/analysis plan, in which I have clearly outlined the key questions regarding/steps required for completion this project.
+* A page with selected analyses/results, which could be presented to lay stakeholders. 
+

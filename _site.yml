@@ -1,0 +1,18 @@
+name: "Maimonides Data Analysis Submission: Natalie Boychuk"
+output_dir: "."
+navbar:
+  title: "Home"
+  left:
+    - text: "Workplan"
+      href: analysis-workplan.html
+    - text: "Selected Analyses and Conclusions"
+      href: Exploratory_Analyses.html
+    - text: "Complete record of data cleaning/analysis"
+      href: report_cleaning-analysis.html
+    - icon: fa-github fa-sm
+      href: 
+
+output:
+  html_document:
+    code_folding: hide 
+    theme: flatly
