@@ -1,0 +1,676 @@
+---
+title: "Complete Report: Cleaning/Analysis"
+output: html_document
+---
+
+```{r setup }
+library(tidyverse)
+library(ggridges)
+library(patchwork)
+library(readxl)
+library(ggplot2)
+
+
+knitr::opts_chunk$set(
+	echo = TRUE,
+	warning = FALSE,
+	fig.width = 8, 
+  fig.height = 6,
+  out.width = "90%"
+)
+
+theme_set(theme_minimal() + theme(legend.position = "bottom"))
+
+options(
+  ggplot2.continuous.colour = "viridis",
+  ggplot2.continuous.fill = "viridis"
+)
+
+scale_colour_discrete = scale_colour_viridis_d
+scale_fill_discrete = scale_fill_viridis_d
+```
+
+```{r reading in data}
+austin = 
+read_csv("data/austin_2015-2017.csv") %>% 
+  janitor::clean_names()
+
+```
+
+Below, I start to clean the data. The first problem is that responses under "fruits and vegetable consumption" were read in as dates. 
+
+```{r data cleaning - prob 1 }
+
+fruits_austin = 
+  austin %>% 
+  mutate(factor_fruits = case_when(
+    fruits_vegetable_consumption == "4-Mar" ~ "2-3 ",
+    fruits_vegetable_consumption == "2-Jan" ~ "3-4",
+    fruits_vegetable_consumption == "0" ~ "0", 
+    fruits_vegetable_consumption == "5 or more" ~ "5 or more", 
+    fruits_vegetable_consumption == "Not Sure"~ "Not Sure"
+  )) %>% 
+  select(-fruits_vegetable_consumption)
+
+```
+
+There is a similar problem with variables "food_measurement" and "carbohydrate calculating." I will apply the same method below to create clean versions of the same variable. 
+
+Another issue with the "food measurement" variable is that some "0" values are coded as "0" while others are coded as "0 days." 
+
+```{r data cleaning - prob 2}
+
+measure_austin = 
+  fruits_austin %>% 
+  mutate(food_measurement1 = case_when(
+    food_measurement == "0" ~ "0", 
+    food_measurement == "0 days" ~ "0",
+    food_measurement == "3-Jan" ~ "1-3", 
+    food_measurement == "4 or more" ~ "4 or more", 
+    food_measurement == "I don't know how" ~ "I don't know how"
+  )) %>% 
+  mutate(carb_counting1 = case_when(
+    carbohydrate_counting == "0 days" ~ "0",
+    carbohydrate_counting == "3-Jan" ~ "1-3", 
+    carbohydrate_counting == "4 or more" ~ "4 or more",
+    carbohydrate_counting == "I don't know how" ~ "I don't know how"
+  )) %>%
+  select(-carbohydrate_counting, -food_measurement) %>% 
+  relocate(unique_id, class_language, age, year, gender, insurance_category, medical_home_category, race_ethnicity, education_level, diabetes_status_yes_no, heart_disease_yes_no, high_blood_pressure_yes_no, tobacco_use_yes_no, previous_diabetes_education_yes_no, diabetes_knowledge, sugar_sweetened_beverage_consumption, factor_fruits, food_measurement1, carb_counting1, exercise, problem_area_in_diabetes_paid_scale_score)
+
+```
+
+One other other problem with the existing data I can see is the use of 9-11 and 1-08 in the education column. I checked original dataset at https://data.austintexas.gov/Health-and-Community-Services/Austin-Public-Health-Diabetes-Self-Management-Educ/48iy-4sbg and there is no description of the classification. 
+
+I assume that 9-11 is "less than high school" and 1-08 is "No high school" because I do not want to erroneously remove a large number of observations, particularly if they represent a low education group. Removing 2 observations that responded "n" or "y" 
+
+There is one observation under gender classified as "f" rather than F. Fixing that
+
+```{r fixing gender}
+
+measure_austin = 
+  measure_austin %>% 
+  filter(gender != "f")
+
+```
+
+```{r removing y/n from education category}
+measure_austin = 
+  measure_austin %>% 
+  filter(education_level != c("y", "n"))
+
+```
+
+
+Below I begin some exploratory analyses/visualizations to better understand the data. 
+
+```{r plot - age distribution by race/ethnicity and by gender}
+
+age_race_distrib = 
+  measure_austin %>% 
+  filter(race_ethnicity != "Unknown") %>% 
+  ggplot(aes(x = race_ethnicity, y = age)) + 
+           geom_boxplot() +
+    theme(axis.text.x = element_text(angle = 90, vjust = 1, hjust=.75),
+        legend.position = 'none')
+
+age_gender_distrib = 
+  measure_austin %>% 
+  filter(gender != "f") %>% 
+  ggplot(aes(x = gender, y = age)) + 
+           geom_boxplot() +
+    theme(axis.text.x = element_text(angle = 90, vjust = 1, hjust=.75),
+        legend.position = 'none')
+
+
+```
+
+```{r plot - medical home distribution by language}
+
+distrb_lang = 
+  measure_austin %>% 
+  group_by(class_language, medical_home_category) %>% 
+  summarise(n_obs = n()) %>% 
+    ggplot(aes(x = medical_home_category, y = n_obs, fill = class_language)) + 
+           geom_bar(position = "dodge", stat = "identity") +
+    theme(axis.text.x = element_text(angle = 90, vjust = 1, hjust=.75))
+
+distrb_insur = 
+  measure_austin %>% 
+  group_by(insurance_category, medical_home_category) %>% 
+  summarise(n_obs = n()) %>% 
+    ggplot(aes(x = medical_home_category, y = n_obs, fill = insurance_category)) +
+           geom_bar(position = "dodge", stat = "identity") +
+    theme(axis.text.x = element_text(angle = 90, vjust = 1, hjust=.75))
+
+insur_broad = 
+   measure_austin %>% 
+  group_by(insurance_category, diabetes_status_yes_no) %>% 
+  summarise(n_obs = n()) %>% 
+    ggplot(aes(x = insurance_category, y = n_obs, fill = diabetes_status_yes_no)) +
+           geom_bar(stat = "identity") +
+    theme(axis.text.x = element_text(angle = 90, vjust = 1, hjust=.75))
+
+
+
+insur_broad = 
+   measure_austin %>% 
+  group_by(insurance_category) %>% 
+  summarise(n_obs = n()) %>% 
+    ggplot(aes(x = insurance_category, y = n_obs, fill = insurance_category)) +
+           geom_bar(stat = "identity") +
+    theme(axis.text.x = element_text(angle = 90, vjust = 1, hjust=.75))
+
+```
+
+```{r where are most of the diabetes cases}
+case_diab = 
+  measure_austin %>% 
+  group_by(diabetes_status_yes_no, medical_home_category) %>% 
+  summarise(n_obs = n()) %>% 
+    ggplot(aes(x = medical_home_category, y = n_obs, fill = diabetes_status_yes_no)) +
+           geom_bar(stat = "identity") +
+    theme(axis.text.x = element_text(angle = 90, vjust = 1, hjust=.75))
+
+```
+
+** Computing Summary Statistics ** 
+
+I will first compute summary statistics 
+Disaggregating by diabetes status (which will be relevant to our PAID scale) I want to get a broad summary of demographic factors of these folks. Maybe then I should do a chi-square to see if they differ significantly on 
+
+```{r summary demographic stats for all observations}
+
+skimr::skim(measure_austin)
+
+summ_stat_race = 
+measure_austin %>% 
+  group_by(race_ethnicity) %>% 
+  summarise(
+    race_n = n()
+  )
+
+summ_stat_age = 
+  measure_austin %>% 
+  summarise(
+    mean_age = mean(age, na.rm = TRUE),
+    median_age = median(age, na.rm = TRUE), 
+    sd = sd(age, na.rm = TRUE)
+  )
+
+summ_stat_gender = 
+  measure_austin %>% 
+  group_by(gender) %>% 
+  summarise(
+    gender_n = n()
+  )
+
+
+
+```
+
+Assessing the distribution of each of the independent variables and the dependent variable:
+
+```{r distribution of outcome variable}
+outcome = 
+  measure_austin %>% 
+  ggplot(aes(y = problem_area_in_diabetes_paid_scale_score)) +
+  geom_boxplot() + 
+      theme(axis.text.x = element_text(angle = 90, vjust = 1, hjust=.75))
+
+```
+
+The outcome is approximately normal, so I will feel comfortable estimating a parametric linear model. 
+
+```{r distribution of independent variables}
+
+gender_plot = 
+    measure_austin %>% 
+  group_by(gender) %>% 
+  summarise(n_obs = n()) %>% 
+    ggplot(aes(x = gender, y = n_obs)) +
+           geom_bar(position = "dodge", stat = "identity") +
+    theme(axis.text.x = element_text(angle = 90, vjust = 1, hjust=.75))  
+
+education_plot = 
+   measure_austin %>% 
+  group_by(education_level) %>% 
+  summarise(n_obs = n()) %>% 
+    ggplot(aes(x = education_level, y = n_obs)) +
+           geom_bar(position = "dodge", stat = "identity") +
+    theme(axis.text.x = element_text(angle = 90, vjust = 1, hjust=.75))  
+
+fruits_plot =
+   measure_austin %>% 
+  group_by(factor_fruits) %>% 
+  summarise(n_obs = n()) %>% 
+    ggplot(aes(x = factor_fruits, y = n_obs)) +
+           geom_bar(position = "dodge", stat = "identity") +
+    theme(axis.text.x = element_text(angle = 90, vjust = 1, hjust=.75))  
+
+swb_plot = 
+   measure_austin %>% 
+  group_by(sugar_sweetened_beverage_consumption) %>% 
+  summarise(n_obs = n()) %>% 
+    ggplot(aes(x = sugar_sweetened_beverage_consumption, y = n_obs)) +
+           geom_bar(position = "dodge", stat = "identity") +
+    theme(axis.text.x = element_text(angle = 90, vjust = 1, hjust=.75))   
+   
+ex_plot = 
+   measure_austin %>% 
+  group_by(exercise) %>% 
+  summarise(n_obs = n()) %>% 
+    ggplot(aes(x = exercise, y = n_obs)) +
+           geom_bar(position = "dodge", stat = "identity") +
+    theme(axis.text.x = element_text(angle = 90, vjust = 1, hjust=.75))  
+
+carb_plot = 
+  measure_austin %>% 
+  group_by(carb_counting1) %>% 
+  summarise(n_obs = n()) %>% 
+    ggplot(aes(x = carb_counting1, y = n_obs)) +
+           geom_bar(position = "dodge", stat = "identity") +
+    theme(axis.text.x = element_text(angle = 90, vjust = 1, hjust=.75))  
+
+food_measure = 
+measure_austin %>% 
+  group_by(food_measurement1) %>% 
+  summarise(n_obs = n()) %>% 
+    ggplot(aes(x = food_measurement1, y = n_obs)) +
+           geom_bar(position = "dodge", stat = "identity") +
+    theme(axis.text.x = element_text(angle = 90, vjust = 1, hjust=.75))  
+
+
+
+```
+
+
+```{r distribution of PAID scale by insurance/medical home category}
+
+paid_distr = 
+  measure_austin %>% 
+  ggplot(aes(x = insurance_category, y = problem_area_in_diabetes_paid_scale_score)) + 
+  geom_boxplot() + 
+      theme(axis.text.x = element_text(angle = 90, vjust = 1, hjust=.75))
+
+paid_distr_medical = 
+  measure_austin %>% 
+  ggplot(aes(x = medical_home_category, y = problem_area_in_diabetes_paid_scale_score)) + 
+  geom_boxplot() + 
+      theme(axis.text.x = element_text(angle = 90, vjust = 1, hjust=.75))
+
+```
+
+
+```{r distribution of PAID scale by nutrition/lifestyle factors }
+
+sweets = 
+  measure_austin %>% 
+  filter(diabetes_status_yes_no == "Yes") %>% 
+  ggplot(aes(x = sugar_sweetened_beverage_consumption, y = problem_area_in_diabetes_paid_scale_score)) +
+  geom_boxplot() + 
+      theme(axis.text.x = element_text(angle = 90, vjust = 1, hjust=.75))
+
+carbs = 
+  measure_austin %>%
+  filter(diabetes_status_yes_no == "Yes") %>% 
+    ggplot(aes(x = carb_counting1, y = problem_area_in_diabetes_paid_scale_score)) +
+  geom_boxplot() + 
+      theme(axis.text.x = element_text(angle = 90, vjust = 1, hjust=.75))
+
+fruits = 
+  measure_austin %>% 
+    filter(diabetes_status_yes_no == "Yes") %>% 
+    ggplot(aes(x = factor_fruits, y = problem_area_in_diabetes_paid_scale_score)) +
+  geom_boxplot() + 
+      theme(axis.text.x = element_text(angle = 90, vjust = 1, hjust=.75))
+
+food_measure = 
+    measure_austin %>% 
+    filter(diabetes_status_yes_no == "Yes") %>% 
+    ggplot(aes(x = food_measurement1, y = problem_area_in_diabetes_paid_scale_score)) +
+  geom_boxplot() + 
+      theme(axis.text.x = element_text(angle = 90, vjust = 1, hjust=.75))
+
+exercise = 
+  measure_austin %>% 
+   filter(diabetes_status_yes_no == "Yes") %>% 
+    ggplot(aes(x = exercise, y = problem_area_in_diabetes_paid_scale_score)) +
+  geom_boxplot() + 
+      theme(axis.text.x = element_text(angle = 90, vjust = 1, hjust=.75))
+
+tobacco = 
+  measure_austin %>% 
+   filter(diabetes_status_yes_no == "Yes") %>% 
+    ggplot(aes(x = tobacco_use_yes_no, y = problem_area_in_diabetes_paid_scale_score)) +
+  geom_boxplot() + 
+      theme(axis.text.x = element_text(angle = 90, vjust = 1, hjust=.75))  
+
+```
+
+Looking at the distribution of PAID scores by diabetes knowledge/previous diabetes education
+
+```{r}
+
+knowledge = 
+  measure_austin %>% 
+   filter(diabetes_status_yes_no == "Yes") %>% 
+    ggplot(aes(x = diabetes_knowledge, y = problem_area_in_diabetes_paid_scale_score)) +
+  geom_boxplot() + 
+      theme(axis.text.x = element_text(angle = 90, vjust = 1, hjust=.75)) 
+
+education = 
+    measure_austin %>% 
+   filter(diabetes_status_yes_no == "Yes") %>% 
+    ggplot(aes(x = previous_diabetes_education_yes_no, y = problem_area_in_diabetes_paid_scale_score)) +
+  geom_boxplot() + 
+      theme(axis.text.x = element_text(angle = 90, vjust = 1, hjust=.75)) 
+
+```
+
+Assessing distribution of PAID scores by pre-existing health condition 
+
+```{r}
+
+heart = 
+    measure_austin %>% 
+   filter(diabetes_status_yes_no == "Yes") %>% 
+    ggplot(aes(x = heart_disease_yes_no, y = problem_area_in_diabetes_paid_scale_score)) +
+  geom_boxplot() + 
+      theme(axis.text.x = element_text(angle = 90, vjust = 1, hjust=.75)) 
+
+
+hypertension = 
+    measure_austin %>% 
+   filter(diabetes_status_yes_no == "Yes") %>% 
+    ggplot(aes(x = high_blood_pressure_yes_no, y = problem_area_in_diabetes_paid_scale_score)) +
+  geom_boxplot() + 
+      theme(axis.text.x = element_text(angle = 90, vjust = 1, hjust=.75)) 
+
+```
+
+Demographic variables 
+
+```{r}
+race_ethni = 
+    measure_austin %>% 
+   filter(diabetes_status_yes_no == "Yes") %>% 
+    ggplot(aes(x = race_ethnicity, y = problem_area_in_diabetes_paid_scale_score)) +
+  geom_boxplot() + 
+      theme(axis.text.x = element_text(angle = 90, vjust = 1, hjust=.75))
+
+lang = 
+   measure_austin %>% 
+   filter(diabetes_status_yes_no == "Yes") %>% 
+  ggplot(aes(x = class_language, y = problem_area_in_diabetes_paid_scale_score)) +
+  geom_boxplot() + 
+      theme(axis.text.x = element_text(angle = 90, vjust = 1, hjust=.75))
+
+age_paid = 
+   measure_austin %>% 
+   filter(diabetes_status_yes_no == "Yes") %>% 
+   ggplot(aes(x = age, y = problem_area_in_diabetes_paid_scale_score)) +
+   geom_point() + 
+      theme(axis.text.x = element_text(angle = 90, vjust = 1, hjust=.75))
+
+edu_paid = 
+   measure_austin %>% 
+   filter(diabetes_status_yes_no == "Yes") %>% 
+   ggplot(aes(x = education_level, y = problem_area_in_diabetes_paid_scale_score)) +
+   geom_boxplot() + 
+      theme(axis.text.x = element_text(angle = 90, vjust = 1, hjust=.75))
+
+
+gender_paid = 
+   measure_austin %>% 
+   filter(diabetes_status_yes_no == "Yes") %>% 
+   ggplot(aes(x = gender, y = problem_area_in_diabetes_paid_scale_score)) +
+   geom_boxplot() + 
+      theme(axis.text.x = element_text(angle = 90, vjust = 1, hjust=.75))
+```
+
+Hispanic/Latinx people with diabetes and those who speak Spanish seem to have higher PAID scores, on average. There is no clear association between age and PAID score. People with lower education on average have higher PAID scores. The relationship between age and PAID score is clearly non-linear. 
+
+```{r}
+n_paid = 
+   measure_austin %>% 
+   drop_na(problem_area_in_diabetes_paid_scale_score) %>% 
+   summarise(n_obs = n())
+
+n_diabetes = 
+  measure_austin %>% 
+  filter(diabetes_status_yes_no != "Yes") %>% 
+  summarise(n_diab_obs = n())
+
+```
+
+There are 946 people in the sample with diabetes and 632 with a value for the PAID score. This tells me that I have sufficient n to deal with issues of non-normality.
+
+Beginning to test correlation between some binary variables and PAID, the outcome of interest.
+
+Before conducting any t-tests to assess the correlation between predictors and PAID score, I use the Fligner-Killeen test for homogeneity of variances. In cases where the variances were significantly different, I computed the t-test assuming inequality of variances.
+
+```{r}
+
+##  Gender 
+fligner.test(problem_area_in_diabetes_paid_scale_score ~ gender, data = measure_austin)
+# not significant - use equal variances  
+
+t.test(problem_area_in_diabetes_paid_scale_score ~ gender, var.equal=TRUE, data = measure_austin)
+
+## Tobacco use 
+fligner.test(problem_area_in_diabetes_paid_scale_score ~ tobacco_use_yes_no, data = measure_austin)
+# not significant - use equal variances 
+
+t.test(problem_area_in_diabetes_paid_scale_score ~ tobacco_use_yes_no, var.equal=TRUE, data = measure_austin)
+
+## Hypertension 
+fligner.test(problem_area_in_diabetes_paid_scale_score ~ high_blood_pressure_yes_no, data = measure_austin)
+# significant - assume unequal variances 
+
+t.test(problem_area_in_diabetes_paid_scale_score ~ high_blood_pressure_yes_no, var.equal=FALSE, data = measure_austin)
+
+## Heart disease 
+fligner.test(problem_area_in_diabetes_paid_scale_score ~ heart_disease_yes_no, data = measure_austin)
+
+t.test(problem_area_in_diabetes_paid_scale_score ~ heart_disease_yes_no, var.equal=FALSE, data = measure_austin)
+
+## Previous diabetes education 
+fligner.test(problem_area_in_diabetes_paid_scale_score ~ previous_diabetes_education_yes_no, data = measure_austin)
+
+t.test(problem_area_in_diabetes_paid_scale_score ~ previous_diabetes_education_yes_no, var.equal=TRUE, data = measure_austin)
+
+
+```
+
+All of the binary variables are significantly associated with the outcome, PAID score, and might be included in my final model. 
+
+
+Now I am going to assess whether some of my categorical variables are associated with the outcome using ANOVA.
+
+```{r}
+
+## Insurance Category 
+res.aov <- aov(problem_area_in_diabetes_paid_scale_score ~ insurance_category, data = measure_austin)
+summary(res.aov)
+# significant*** - p = 2.23e-07
+
+## Medical home category 
+res.aov <- aov(problem_area_in_diabetes_paid_scale_score ~ medical_home_category, data = measure_austin)
+summary(res.aov)
+# significant *** p = .000172
+
+## Race/ethnicity 
+res.aov <- aov(problem_area_in_diabetes_paid_scale_score ~ race_ethnicity, data = measure_austin)
+summary(res.aov)
+# significant *** p = <2e-16 
+
+## Language
+res.aov <- aov(problem_area_in_diabetes_paid_scale_score ~ class_language, data = measure_austin)
+summary(res.aov)
+# significant *** p = <2e-16 - will look into association between race/ethnicity and language to assess for collinearity before including in final model 
+
+## Education 
+res.aov <- aov(problem_area_in_diabetes_paid_scale_score ~ education_level, data = measure_austin)
+summary(res.aov)
+# significant *** p = 1.41e-15 
+
+## Diabetes knowledge
+res.aov <- aov(problem_area_in_diabetes_paid_scale_score ~ diabetes_knowledge, data = measure_austin)
+summary(res.aov)
+# significant *** p = 2.56e-13 
+
+## Sugar sweetened beverages 
+res.aov <- aov(problem_area_in_diabetes_paid_scale_score ~ sugar_sweetened_beverage_consumption, data = measure_austin)
+summary(res.aov)
+# significant *** p = 0.000492
+
+## Fruit consumption 
+res.aov <- aov(problem_area_in_diabetes_paid_scale_score ~ factor_fruits, data = measure_austin)
+summary(res.aov)
+# significant *** p = 2.5e-05
+
+## Carb counting 
+res.aov <- aov(problem_area_in_diabetes_paid_scale_score ~ carb_counting1, data = measure_austin)
+summary(res.aov)
+# significant *** p = 4.89e-05 
+
+## Exercise 
+res.aov <- aov(problem_area_in_diabetes_paid_scale_score ~ exercise, data = measure_austin)
+summary(res.aov)
+# significant ** p = .00537
+
+```
+
+Assessing collinearity between some variables I theorize may be associated with each other before I build the final model. 
+
+```{r testing for collinearity}
+
+## Race/ethnicity with language
+collinearity_test1 <- chisq.test(table(measure_austin$class_language, measure_austin$race_ethnicity))
+# expected values are very small so this test may not give the most accurate results. p-value was significant (<2.2e-16) and theoretically these concepts are related so I will only use one in the final model. I will do a Fisher's exact test to double-check this finding. 
+
+fisher1 <- fisher.test(table(measure_austin$class_language, measure_austin$race_ethnicity), simulate.p.value=TRUE)
+## Note: used simulations because of small workspace.P-value is significant (p = .0004998) so I will use one of these variables in the final model. 
+
+## Heart disease and high bp 
+collinearity_test2 <- chisq.test(table(measure_austin$high_blood_pressure_yes_no, measure_austin$heart_disease_yes_no))
+# significant p-value - suggests these variables are almost perfectly correlated. Will include high blood pressure and exclude heart disease from final model. 
+
+## Diet and exercise variables 
+collinearity_test2 <- chisq.test(table(measure_austin$exercise, measure_austin$carb_counting1))
+# p-value = 8.956e-11 but again expected values are too low. Doing a Fisher's exact test with simulated p-values to compute this. 
+fisher2 <- fisher.test(table(measure_austin$exercise, measure_austin$carb_counting1), simulate.p.value=TRUE)
+## Significant. Will exclude exercise from 
+
+
+
+```
+
+Building the final model. I will start with all variables at once and exclude variables that are not significant one at a time. 
+
+```{r}
+
+paid_model = lm(problem_area_in_diabetes_paid_scale_score ~ class_language + gender + insurance_category + medical_home_category + education_level + high_blood_pressure_yes_no + tobacco_use_yes_no + previous_diabetes_education_yes_no + sugar_sweetened_beverage_consumption + factor_fruits + food_measurement1 + carb_counting1 + exercise, data = measure_austin)
+
+paid_model %>% 
+  broom::tidy() %>% 
+  knitr::kable()
+
+```
+
+When accounting for almost all of the variables together, language, gender, medical home category, tobacco use, sugar-sweetened beverage consumption, food measurement, carb counting, and exercise do not seem to be adding anything to the model. I will exclude the variables using a backwards stepwise approach, removing one variable from the model at a time. 
+
+```{r model without language}
+
+paid_model2 = lm(problem_area_in_diabetes_paid_scale_score ~ gender + insurance_category + medical_home_category + education_level + high_blood_pressure_yes_no + tobacco_use_yes_no + previous_diabetes_education_yes_no + sugar_sweetened_beverage_consumption + factor_fruits + food_measurement1 + carb_counting1 + exercise, data = measure_austin)
+
+paid_model2 %>% 
+  broom::tidy() %>% 
+  knitr::kable()
+
+```
+
+```{r excluding gender}
+paid_model3 = lm(problem_area_in_diabetes_paid_scale_score ~ insurance_category + medical_home_category + education_level + high_blood_pressure_yes_no + tobacco_use_yes_no + previous_diabetes_education_yes_no + sugar_sweetened_beverage_consumption + factor_fruits + food_measurement1 + carb_counting1 + exercise, data = measure_austin)
+
+paid_model3 %>% 
+  broom::tidy() %>% 
+  knitr::kable()
+
+```
+
+```{r excluding medical home category}
+
+paid_model4 = lm(problem_area_in_diabetes_paid_scale_score ~ insurance_category + education_level + high_blood_pressure_yes_no + tobacco_use_yes_no + previous_diabetes_education_yes_no + sugar_sweetened_beverage_consumption + factor_fruits + food_measurement1 + carb_counting1 + exercise, data = measure_austin)
+
+paid_model4 %>% 
+  broom::tidy() %>% 
+  knitr::kable()
+```
+
+```{r excluding tobacco use}
+paid_model5 = lm(problem_area_in_diabetes_paid_scale_score ~ insurance_category + education_level + high_blood_pressure_yes_no + previous_diabetes_education_yes_no + sugar_sweetened_beverage_consumption + factor_fruits + food_measurement1 + carb_counting1 + exercise, data = measure_austin)
+
+paid_model5 %>% 
+  broom::tidy() %>% 
+  knitr::kable()
+
+```
+
+```{r excluding sugar-sweetened beverage consumption}
+paid_model6 = lm(problem_area_in_diabetes_paid_scale_score ~ insurance_category + education_level + high_blood_pressure_yes_no + previous_diabetes_education_yes_no + factor_fruits + food_measurement1 + carb_counting1 + exercise, data = measure_austin)
+
+paid_model6 %>% 
+  broom::tidy() %>% 
+  knitr::kable()
+
+```
+
+```{r excluding food measurement}
+
+paid_model7 = lm(problem_area_in_diabetes_paid_scale_score ~ insurance_category + education_level + high_blood_pressure_yes_no + previous_diabetes_education_yes_no + factor_fruits  + carb_counting1 + exercise, data = measure_austin)
+
+paid_model7 %>% 
+  broom::tidy() %>% 
+  knitr::kable()
+```
+
+```{r excluding carb counting}
+
+paid_model8 = lm(problem_area_in_diabetes_paid_scale_score ~ insurance_category + education_level + high_blood_pressure_yes_no + previous_diabetes_education_yes_no + factor_fruits + exercise, data = measure_austin)
+
+paid_model8 %>% 
+  broom::tidy() %>% 
+  knitr::kable()
+
+```
+
+```{r model excluding exercise}
+paid_model9 = lm(problem_area_in_diabetes_paid_scale_score ~ insurance_category + education_level + high_blood_pressure_yes_no + previous_diabetes_education_yes_no + factor_fruits, data = measure_austin)
+
+paid_model9 %>% 
+  broom::tidy() %>% 
+  knitr::kable()
+
+```
+
+I have noticed that previous diabetes education is no longer significant in the model, so I will also remove this for parsimony. 
+
+```{r model excluding previous diabetes education}
+paid_model10 = lm(problem_area_in_diabetes_paid_scale_score ~ insurance_category + education_level + high_blood_pressure_yes_no + factor_fruits, data = measure_austin)
+
+paid_model10 %>% 
+  broom::tidy() %>% 
+  knitr::kable()
+
+```
+
+Now assessing the utility of the model as a whole 
+
+```{r}
+summary_model <- summary(paid_model10)
+
+```
+
+The f-statistic of the model (the omnibus test) is significant, which demonstrates that the model has good fit.

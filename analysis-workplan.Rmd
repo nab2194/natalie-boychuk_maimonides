@@ -1,0 +1,29 @@
+---
+title: "Analysis Plan"
+output: html_document
+---
+
+
+
+## Data Cleaning
+* Read in .csv file and clean column names
+* Fix data under the variables for fruit consumption, carbohydrate counting, and food measurement which were laoded in as dates as opposed to a range of consumption (1-2, 3-4)
+* Change code under food measurement from "0 days" to "0" for uniformity 
+* Fix one observation added as "f" to "F" within the gender variable 
+* Remove observations for which education is "y" or "n"
+
+
+## Questions for exploratory analysis
+* What are the demographic characteristics of participants? Do these factors differ by diabetes status? 
+* Where do people with diabetes generally access care, and what type of insurance plan are they enrolled in? 
+* How is PAID scale score distributed across demographic variables (gender, education, race/ethnicity) and lifestyle factors (exercise, variables related to diet)? 
+
+
+
+
+## Steps in Model Building 
+* Visually inspect distribution of PAID scale scores to test normality (in order to use parametric test)
+* Assess correlation of each of the predictors with the outcome of interest (PAID scale score) using two-sample t-tests and ANOVA 
+* Assess potential collinearity of predictors 
+* Use a backwards stepwise regression to build a model, starting with the most saturated model and eliminating variables that are not significant 
+

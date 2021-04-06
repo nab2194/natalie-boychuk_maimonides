@@ -1,0 +1,352 @@
+---
+title: "Selected Analyses and Conclusions"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+library(tidyverse)
+library(ggridges)
+library(patchwork)
+library(readxl)
+library(ggplot2)
+library(table1)
+
+knitr::opts_chunk$set(
+	echo = TRUE,
+	warning = FALSE,
+	fig.width = 8, 
+  fig.height = 6,
+  out.width = "90%"
+)
+
+theme_set(theme_minimal() + theme(legend.position = "bottom"))
+
+options(
+  ggplot2.continuous.colour = "viridis",
+  ggplot2.continuous.fill = "viridis"
+)
+
+scale_colour_discrete = scale_colour_viridis_d
+scale_fill_discrete = scale_fill_viridis_d
+```
+
+```{r reading in data, include = FALSE}
+austin = 
+read_csv("data/austin_2015-2017.csv") %>% 
+  janitor::clean_names()
+
+```
+
+```{r data cleaning - prob 1, include = FALSE  }
+
+fruits_austin = 
+  austin %>% 
+  mutate(factor_fruits = case_when(
+    fruits_vegetable_consumption == "4-Mar" ~ "2-3 ",
+    fruits_vegetable_consumption == "2-Jan" ~ "3-4",
+    fruits_vegetable_consumption == "0" ~ "0", 
+    fruits_vegetable_consumption == "5 or more" ~ "5 or more", 
+    fruits_vegetable_consumption == "Not Sure"~ "Not Sure"
+  )) %>% 
+  select(-fruits_vegetable_consumption)
+
+```
+
+
+```{r data cleaning - prob 2, include=FALSE}
+
+measure_austin = 
+  fruits_austin %>% 
+  mutate(food_measurement1 = case_when(
+    food_measurement == "0" ~ "0", 
+    food_measurement == "0 days" ~ "0",
+    food_measurement == "3-Jan" ~ "1-3", 
+    food_measurement == "4 or more" ~ "4 or more", 
+    food_measurement == "I don't know how" ~ "I don't know how"
+  )) %>% 
+  mutate(carb_counting1 = case_when(
+    carbohydrate_counting == "0 days" ~ "0",
+    carbohydrate_counting == "3-Jan" ~ "1-3", 
+    carbohydrate_counting == "4 or more" ~ "4 or more",
+    carbohydrate_counting == "I don't know how" ~ "I don't know how"
+  )) %>%
+  select(-carbohydrate_counting, -food_measurement) %>% 
+  relocate(unique_id, class_language, age, year, gender, insurance_category, medical_home_category, race_ethnicity, education_level, diabetes_status_yes_no, heart_disease_yes_no, high_blood_pressure_yes_no, tobacco_use_yes_no, previous_diabetes_education_yes_no, diabetes_knowledge, sugar_sweetened_beverage_consumption, factor_fruits, food_measurement1, carb_counting1, exercise, problem_area_in_diabetes_paid_scale_score)
+
+```
+
+```{r fixing gender, include = FALSE }
+
+measure_austin = 
+  measure_austin %>% 
+  filter(gender != "f")
+
+```
+
+```{r removing y/n from education category, include = FALSE}
+measure_austin = 
+  measure_austin %>% 
+  filter(education_level != c("y", "n"))
+
+```
+
+This section of the website outlines the key exploratory analyses used to understand the data, as well as the predictive model developed as part of this project. To see the methods of the site in more detail, please go to to the "Complete Report" tab. 
+
+# Demographic Characteristics of Participants 
+
+```{r table 1}
+
+measure_austin3 <- measure_austin
+measure_austin3$education_level <- factor (measure_austin3$education_level, levels = c("none", "1-08","9-11","High School GED", "Some College", "College"))
+
+present_austin = 
+measure_austin3 %>% 
+  rename("Gender" = "gender", 
+         "Age" = "age",
+         "Race" = "race_ethnicity",
+         "Language" = "class_language",
+         "Insurance" = "insurance_category",
+         "Medical" = "medical_home_category",
+         "Education" = "education_level")
+
+demographic_table <- table1(~ factor(Gender) + Age + factor(Race) + factor(Language) + factor(Education) + factor(Insurance) + factor(Medical), data = present_austin)
+
+demographic_table
+
+```
+
+
+The vast majority of participants included in the dataset (80.4%) are women. On average, participants are 49 (SD = 15.1). More than half (64.9%) of participants are Hispanic/Latino and the majority (57.8%) speak Spanish as their first language. More than one-quarter (26.9%) of participants are uninsured and about one-fifth (22.7%) are on MediCARE or Medicaid. CommUnity Care (24.9%) and Doctor's Offices (26.3%) are the most common medical homes of participants. 
+
+
+
+```{r include = FALSE}
+
+measure_austin2 <- measure_austin 
+
+measure_austin2$diabetes_status_yes_no <- factor (measure_austin2$diabetes_status_yes_no, levels = c("Yes","No","Unknown"))
+
+insur_broad = 
+  measure_austin2 %>%
+  rename(Diabetes = diabetes_status_yes_no) %>% 
+  drop_na(insurance_category, Diabetes) %>% 
+  group_by(insurance_category, Diabetes) %>% 
+  summarise(n_obs = n()) %>% 
+    ggplot(aes(x = insurance_category, y = n_obs, fill = Diabetes)) +
+           geom_bar(stat = "identity") +
+    theme(axis.text.x = element_text(angle = 90, vjust = 1, hjust=.75)) +
+    labs(
+    title = "Insurance Coverage by Diabetes Status",
+    y = "Number of Observations",
+    x = "Insurance Category")
+
+insur_broad
+
+```
+
+
+# Presence of Pre-Existing Medical Conditions/Comorbidities/health risk-factors 
+
+```{r include=FALSE}
+
+comorbities_austin = 
+  measure_austin %>% 
+  rename("CVD" = "heart_disease_yes_no", 
+         "Hypertension" = "high_blood_pressure_yes_no",
+         "Tobacco" = "tobacco_use_yes_no")
+
+comorbidities_austin2 <- comorbities_austin
+comorbidities_austin2$CVD <- factor (comorbidities_austin2$CVD, levels = c("Yes","No","Missing"))
+
+comorbidities_austin2$Hypertension <- factor (comorbidities_austin2$Hypertension, levels = c("Yes","No","Missing"))
+
+comorbidities_austin2$Tobacco <- factor (comorbidities_austin2$Tobacco, levels = c("Yes","No","Missing"))
+
+
+health_table <- table1(~ factor(CVD) + factor(Hypertension) + factor(Tobacco), data = comorbidities_austin2)
+
+```
+
+```{r}
+health_table  
+```
+
+The vast majority of participants do not have health risk factors/pre-existing conditions that may influence PAID scale score. Very few participants (7.5%) have cardiovascular disease (CVD), less than one-tenth (6.6%) smoke, and less than one-half (36.2%) report having hypertension.
+
+
+```{r include = FALSE}
+food_measure = 
+  measure_austin2 %>%
+  rename("Diabetes" = "diabetes_status_yes_no") %>% 
+  drop_na(Diabetes, food_measurement1) %>% 
+  group_by(food_measurement1, Diabetes) %>% 
+  summarise(n_obs = n()) %>% 
+    ggplot(aes(x = food_measurement1, y = n_obs, fill = Diabetes)) +
+           geom_bar(stat = "identity") +
+    theme(axis.text.x = element_text(angle = 90, vjust = 1, hjust=.75)) + 
+    labs(
+    title = "Food Measurement",
+    y = "Number of Observations",
+    x = "Frequency of Food Measurement")
+
+```
+
+```{r include = FALSE }
+exercise_freq = 
+    measure_austin2 %>%
+  rename("Diabetes" = "diabetes_status_yes_no") %>% 
+  drop_na(Diabetes, exercise) %>% 
+  group_by(exercise, Diabetes) %>% 
+  summarise(n_obs = n()) %>% 
+    ggplot(aes(x = exercise, y = n_obs, fill = Diabetes)) +
+    geom_bar(stat = "identity") +
+    theme(axis.text.x = element_text(angle = 90, vjust = 1, hjust=.75)) + 
+    labs(
+    title = "Exercise by Diabetes Status",
+    y = "Number of Observations",
+    x = "Frequency of Exercise per Week")
+
+```
+
+```{r include = FALSE}
+
+carbs_count = 
+      measure_austin2 %>%
+  rename("Diabetes" = "diabetes_status_yes_no") %>% 
+  drop_na(Diabetes, carb_counting1) %>% 
+  group_by(Diabetes, carb_counting1) %>% 
+  summarise(n_obs = n()) %>% 
+    ggplot(aes(x = carb_counting1, y = n_obs, fill = Diabetes)) +
+    geom_bar(stat = "identity") +
+    theme(axis.text.x = element_text(angle = 90, vjust = 1, hjust=.75)) + 
+    labs(
+    title = "Carbohydrate Counting",
+    y = "Number of Observations",
+    x = "Frequency of Carbohydrate Counting per Week")
+
+```
+
+```{r include = FALSE}
+sugar_sweet = 
+       measure_austin2 %>%
+  rename("Diabetes" = "diabetes_status_yes_no") %>% 
+  drop_na(Diabetes, sugar_sweetened_beverage_consumption) %>% 
+  group_by(Diabetes, sugar_sweetened_beverage_consumption) %>% 
+  summarise(n_obs = n()) %>% 
+    ggplot(aes(x = sugar_sweetened_beverage_consumption, y = n_obs, fill = Diabetes)) +
+    geom_bar(stat = "identity") +
+    theme(axis.text.x = element_text(angle = 90, vjust = 1, hjust=.75)) + 
+    labs(
+    title = "Sugar-Sweetened Beverage Consumption",
+    y = "Number of Observations",
+    x = "Frequency of Sugar-Sweetened Beverages per Week")
+
+```
+
+```{r include = FALSE}
+
+fruits_freq = 
+       measure_austin2 %>%
+  rename("Diabetes" = "diabetes_status_yes_no") %>% 
+  drop_na(Diabetes, factor_fruits) %>% 
+  group_by(Diabetes, factor_fruits) %>% 
+  summarise(n_obs = n()) %>% 
+    ggplot(aes(x = factor_fruits, y = n_obs, fill = Diabetes)) +
+    geom_bar(stat = "identity") +
+    theme(axis.text.x = element_text(angle = 90, vjust = 1, hjust=.75)) +
+    labs(
+    title = "Fruit/Vegetable Consumption",
+    y = "Number of Observations",
+    x = "Fruit/Vegetable Servings per Week")
+```
+
+## Diet and Exercise 
+
+```{r}
+
+(food_measure + carbs_count) / (fruits_freq + sugar_sweet)
+
+```
+
+Participants with and without diabetes tended to perform relatively similarly on dietary factors associated with diabetes management. While the majority of participants consume 3-4 servings of fruits/vegetables per week, a very small proportion of participants measures their food or counts carbohydrates more than once per week. The majority of participants consume 0-1 sugar-sweetened beverages every week. 
+
+
+```{r general exercise, include = FALSE}
+
+exercise_diabetes = 
+  measure_austin %>% 
+  rename(Knowledge = diabetes_knowledge) %>% 
+  drop_na(exercise, Knowledge) %>% 
+  group_by(Knowledge, exercise) %>% 
+  summarise(n_obs = n()) %>% 
+    ggplot(aes(x = exercise, y = n_obs, fill = Knowledge)) +
+    geom_bar(stat = "identity") +
+    theme(axis.text.x = element_text(angle = 90, vjust = 1, hjust=.75)) +
+    labs(
+    title = "Exercise by Diabetes Knowledge",
+    y = "Number of Observations",
+    x = "Frequency of Exercise per Week")
+
+```
+
+```{r}
+
+exercise_diabetes
+
+```
+
+## Diabetes Knowledge
+
+```{r include = FALSE}
+
+measure_austin_knowl <- measure_austin
+measure_austin_knowl$diabetes_knowledge <- factor (measure_austin_knowl$diabetes_knowledge, levels = c("Good","Fair","Poor"))
+
+knowledge_diabetes = 
+  measure_austin_knowl %>% 
+  rename(Knowledge = diabetes_knowledge) %>% 
+  drop_na(previous_diabetes_education_yes_no, Knowledge) %>% 
+  group_by(previous_diabetes_education_yes_no, Knowledge) %>% 
+  summarise(n_obs = n()) %>% 
+    ggplot(aes(x = previous_diabetes_education_yes_no, y = n_obs, fill = Knowledge )) +
+    geom_bar(stat = "identity") +
+    theme(axis.text.x = element_text(angle = 90, vjust = 1, hjust=.75)) +
+    labs(
+    title = "Knowledge of Diabetes and Past Training",
+    y = "Number of Observations",
+    x = "Previous Diabetes Education")
+
+```
+
+Participants who had never received diabetes education in the past were more likely to self-report their knowledge of diabetes management as "poor." A larger proportion of participants who had received previous diabetes education reported having "good" knowledge of diabetes management as compared to those who had not had previous diabetes education. 
+
+## Predictive Model of PAID Scale Scores
+
+I used a backwards stepwise regression approach to determine which predictors drive Problem Area in Diabetes (PAID) Scale Score. A full description of my methods can be found in the "Complete Report" tab.
+
+After excluding variables that were not contributing significantly to the model, I found that high blood pressure, insurance category, education level, and weekly servings of fruits/vegetables are significantly associated with PAID scale scores. These variables were used to construct my final model. 
+
+```{r include = FALSE}
+paid_model10 = lm(problem_area_in_diabetes_paid_scale_score ~ insurance_category + education_level + high_blood_pressure_yes_no + factor_fruits, data = measure_austin)
+
+```
+
+```{r summary of model}
+
+summary(paid_model10)
+```
+
+Education emerged as a significant predictor of low PAID scale score: participants with a high school GED, some college, or a college degree had, on average, PAID scores that were 14.05, 18.80, and 18.79 points lower, respectively, than those with 1-08 years of schooling. 
+
+Surprisingly, people with high blood pressure have significantly lower PAID scale scores than those with normal or low blood pressure. This may reflect increased access to care and education among people managing more than one condition concurrently. 
+
+Fruit and vegetble consumption was the only significant dietary predictor of PAID scale score. Participants who consumed 2-3 servings per week had, on average, PAID scale scores that were 15.23 points lower than participants who did not consume any fruits or vegetables. People who consumed 5 or more servings per week had scores that were, on average, 16.94 points lower than those who consumed 0 servings. This suggests that increasing fruit and vegetable consumption is a modifiable factor that can have significant impacts on diabetes management. 
+
+Somewhat surprisingly, participants using Medicaid as their primary insurance have, on average, a PAID scale score that is 12.12 points lower compared to people using MAP insurance. Additional research is required to understand this link. It is possible that the population of people on Medicaid are younger, on average, than those using other forms of insurance, which could drive better PAID scale scores. 
+
+
+## Conclusions 
+
+This analysis demonstrates that fruit and vegetable consumption is a modifiable lifestyle factor that can significantly improve management of diabetes. 
+
+Future education courses should place additional emphasis on healthy food consumption as opposed to food measurement/carbohydrate counting. Healthy recipes, cooking classes, and peer support for good nutrition may increase servings of fruits and vegetables among people managing diabetes. 

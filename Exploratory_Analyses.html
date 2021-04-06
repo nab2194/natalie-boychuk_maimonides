@@ -1,0 +1,718 @@
+<!DOCTYPE html>
+
+<html>
+
+<head>
+
+<meta charset="utf-8" />
+<meta name="generator" content="pandoc" />
+<meta http-equiv="X-UA-Compatible" content="IE=EDGE" />
+
+
+
+
+<title>Selected Analyses and Conclusions</title>
+
+<script src="site_libs/jquery-1.11.3/jquery.min.js"></script>
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<link href="site_libs/bootstrap-3.3.5/css/flatly.min.css" rel="stylesheet" />
+<script src="site_libs/bootstrap-3.3.5/js/bootstrap.min.js"></script>
+<script src="site_libs/bootstrap-3.3.5/shim/html5shiv.min.js"></script>
+<script src="site_libs/bootstrap-3.3.5/shim/respond.min.js"></script>
+<script src="site_libs/navigation-1.1/tabsets.js"></script>
+<script src="site_libs/navigation-1.1/codefolding.js"></script>
+<link href="site_libs/highlightjs-9.12.0/default.css" rel="stylesheet" />
+<script src="site_libs/highlightjs-9.12.0/highlight.js"></script>
+<link href="site_libs/table1-1.0/table1_defaults.css" rel="stylesheet" />
+<link href="site_libs/font-awesome-5.1.0/css/all.css" rel="stylesheet" />
+<link href="site_libs/font-awesome-5.1.0/css/v4-shims.css" rel="stylesheet" />
+
+<style type="text/css">code{white-space: pre;}</style>
+<style type="text/css">
+  pre:not([class]) {
+    background-color: white;
+  }
+</style>
+<script type="text/javascript">
+if (window.hljs) {
+  hljs.configure({languages: []});
+  hljs.initHighlightingOnLoad();
+  if (document.readyState && document.readyState === "complete") {
+    window.setTimeout(function() { hljs.initHighlighting(); }, 0);
+  }
+}
+</script>
+
+
+
+<style type="text/css">
+h1 {
+  font-size: 34px;
+}
+h1.title {
+  font-size: 38px;
+}
+h2 {
+  font-size: 30px;
+}
+h3 {
+  font-size: 24px;
+}
+h4 {
+  font-size: 18px;
+}
+h5 {
+  font-size: 16px;
+}
+h6 {
+  font-size: 12px;
+}
+.table th:not([align]) {
+  text-align: left;
+}
+</style>
+
+
+
+
+<style type = "text/css">
+.main-container {
+  max-width: 940px;
+  margin-left: auto;
+  margin-right: auto;
+}
+code {
+  color: inherit;
+  background-color: rgba(0, 0, 0, 0.04);
+}
+img {
+  max-width:100%;
+}
+.tabbed-pane {
+  padding-top: 12px;
+}
+.html-widget {
+  margin-bottom: 20px;
+}
+button.code-folding-btn:focus {
+  outline: none;
+}
+summary {
+  display: list-item;
+}
+</style>
+
+
+<style type="text/css">
+/* padding for bootstrap navbar */
+body {
+  padding-top: 60px;
+  padding-bottom: 40px;
+}
+/* offset scroll position for anchor links (for fixed navbar)  */
+.section h1 {
+  padding-top: 65px;
+  margin-top: -65px;
+}
+.section h2 {
+  padding-top: 65px;
+  margin-top: -65px;
+}
+.section h3 {
+  padding-top: 65px;
+  margin-top: -65px;
+}
+.section h4 {
+  padding-top: 65px;
+  margin-top: -65px;
+}
+.section h5 {
+  padding-top: 65px;
+  margin-top: -65px;
+}
+.section h6 {
+  padding-top: 65px;
+  margin-top: -65px;
+}
+.dropdown-submenu {
+  position: relative;
+}
+.dropdown-submenu>.dropdown-menu {
+  top: 0;
+  left: 100%;
+  margin-top: -6px;
+  margin-left: -1px;
+  border-radius: 0 6px 6px 6px;
+}
+.dropdown-submenu:hover>.dropdown-menu {
+  display: block;
+}
+.dropdown-submenu>a:after {
+  display: block;
+  content: " ";
+  float: right;
+  width: 0;
+  height: 0;
+  border-color: transparent;
+  border-style: solid;
+  border-width: 5px 0 5px 5px;
+  border-left-color: #cccccc;
+  margin-top: 5px;
+  margin-right: -10px;
+}
+.dropdown-submenu:hover>a:after {
+  border-left-color: #ffffff;
+}
+.dropdown-submenu.pull-left {
+  float: none;
+}
+.dropdown-submenu.pull-left>.dropdown-menu {
+  left: -100%;
+  margin-left: 10px;
+  border-radius: 6px 0 6px 6px;
+}
+</style>
+
+<script>
+// manage active state of menu based on current page
+$(document).ready(function () {
+  // active menu anchor
+  href = window.location.pathname
+  href = href.substr(href.lastIndexOf('/') + 1)
+  if (href === "")
+    href = "index.html";
+  var menuAnchor = $('a[href="' + href + '"]');
+
+  // mark it active
+  menuAnchor.parent().addClass('active');
+
+  // if it's got a parent navbar menu mark it active as well
+  menuAnchor.closest('li.dropdown').addClass('active');
+});
+</script>
+
+<!-- tabsets -->
+
+<style type="text/css">
+.tabset-dropdown > .nav-tabs {
+  display: inline-table;
+  max-height: 500px;
+  min-height: 44px;
+  overflow-y: auto;
+  background: white;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+}
+
+.tabset-dropdown > .nav-tabs > li.active:before {
+  content: "";
+  font-family: 'Glyphicons Halflings';
+  display: inline-block;
+  padding: 10px;
+  border-right: 1px solid #ddd;
+}
+
+.tabset-dropdown > .nav-tabs.nav-tabs-open > li.active:before {
+  content: "&#xe258;";
+  border: none;
+}
+
+.tabset-dropdown > .nav-tabs.nav-tabs-open:before {
+  content: "";
+  font-family: 'Glyphicons Halflings';
+  display: inline-block;
+  padding: 10px;
+  border-right: 1px solid #ddd;
+}
+
+.tabset-dropdown > .nav-tabs > li.active {
+  display: block;
+}
+
+.tabset-dropdown > .nav-tabs > li > a,
+.tabset-dropdown > .nav-tabs > li > a:focus,
+.tabset-dropdown > .nav-tabs > li > a:hover {
+  border: none;
+  display: inline-block;
+  border-radius: 4px;
+  background-color: transparent;
+}
+
+.tabset-dropdown > .nav-tabs.nav-tabs-open > li {
+  display: block;
+  float: none;
+}
+
+.tabset-dropdown > .nav-tabs > li {
+  display: none;
+}
+</style>
+
+<!-- code folding -->
+<style type="text/css">
+.code-folding-btn { margin-bottom: 4px; }
+</style>
+
+
+
+
+</head>
+
+<body>
+
+
+<div class="container-fluid main-container">
+
+
+
+
+<div class="navbar navbar-default  navbar-fixed-top" role="navigation">
+  <div class="container">
+    <div class="navbar-header">
+      <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#navbar">
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+      </button>
+      <a class="navbar-brand" href="index.html">Home</a>
+    </div>
+    <div id="navbar" class="navbar-collapse collapse">
+      <ul class="nav navbar-nav">
+        <li>
+  <a href="analysis-workplan.html">Workplan</a>
+</li>
+<li>
+  <a href="Exploratory_Analyses.html">Selected Analyses and Conclusions</a>
+</li>
+<li>
+  <a href="report_cleaning-analysis.html">Complete record of data cleaning/analysis</a>
+</li>
+<li>
+  <a>
+    <span class="fa fa-github fa-sm"></span>
+     
+  </a>
+</li>
+      </ul>
+      <ul class="nav navbar-nav navbar-right">
+        
+      </ul>
+    </div><!--/.nav-collapse -->
+  </div><!--/.container -->
+</div><!--/.navbar -->
+
+<div class="fluid-row" id="header">
+
+<div class="btn-group pull-right">
+<button type="button" class="btn btn-default btn-xs dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false"><span>Code</span> <span class="caret"></span></button>
+<ul class="dropdown-menu" style="min-width: 50px;">
+<li><a id="rmd-show-all-code" href="#">Show All Code</a></li>
+<li><a id="rmd-hide-all-code" href="#">Hide All Code</a></li>
+</ul>
+</div>
+
+
+
+<h1 class="title toc-ignore">Selected Analyses and Conclusions</h1>
+
+</div>
+
+
+<p>This section of the website outlines the key exploratory analyses used to understand the data, as well as the predictive model developed as part of this project. To see the methods of the site in more detail, please go to to the “Complete Report” tab.</p>
+<div id="demographic-characteristics-of-participants" class="section level1">
+<h1>Demographic Characteristics of Participants</h1>
+<pre class="r"><code>measure_austin3 &lt;- measure_austin
+measure_austin3$education_level &lt;- factor (measure_austin3$education_level, levels = c(&quot;none&quot;, &quot;1-08&quot;,&quot;9-11&quot;,&quot;High School GED&quot;, &quot;Some College&quot;, &quot;College&quot;))
+
+present_austin = 
+measure_austin3 %&gt;% 
+  rename(&quot;Gender&quot; = &quot;gender&quot;, 
+         &quot;Age&quot; = &quot;age&quot;,
+         &quot;Race&quot; = &quot;race_ethnicity&quot;,
+         &quot;Language&quot; = &quot;class_language&quot;,
+         &quot;Insurance&quot; = &quot;insurance_category&quot;,
+         &quot;Medical&quot; = &quot;medical_home_category&quot;,
+         &quot;Education&quot; = &quot;education_level&quot;)
+
+demographic_table &lt;- table1(~ factor(Gender) + Age + factor(Race) + factor(Language) + factor(Education) + factor(Insurance) + factor(Medical), data = present_austin)
+
+demographic_table</code></pre>
+<div class="Rtable1"><table class="Rtable1">
+<thead>
+<tr>
+<th class='rowlabel firstrow lastrow'></th>
+<th class='firstrow lastrow'><span class='stratlabel'>Overall<br><span class='stratn'>(N=1380)</span></span></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td class='rowlabel firstrow'><span class='varlabel'>factor(Gender)</span></td>
+<td class='firstrow'></td>
+</tr>
+<tr>
+<td class='rowlabel'>F</td>
+<td>1109 (80.4%)</td>
+</tr>
+<tr>
+<td class='rowlabel lastrow'>M</td>
+<td class='lastrow'>271 (19.6%)</td>
+</tr>
+<tr>
+<td class='rowlabel firstrow'><span class='varlabel'>Age</span></td>
+<td class='firstrow'></td>
+</tr>
+<tr>
+<td class='rowlabel'>Mean (SD)</td>
+<td>48.9 (15.1)</td>
+</tr>
+<tr>
+<td class='rowlabel'>Median [Min, Max]</td>
+<td>48.0 [16.0, 91.0]</td>
+</tr>
+<tr>
+<td class='rowlabel lastrow'>Missing</td>
+<td class='lastrow'>19 (1.4%)</td>
+</tr>
+<tr>
+<td class='rowlabel firstrow'><span class='varlabel'>factor(Race)</span></td>
+<td class='firstrow'></td>
+</tr>
+<tr>
+<td class='rowlabel'>American Indian</td>
+<td>5 (0.4%)</td>
+</tr>
+<tr>
+<td class='rowlabel'>Asian</td>
+<td>36 (2.6%)</td>
+</tr>
+<tr>
+<td class='rowlabel'>Black/African American</td>
+<td>302 (21.9%)</td>
+</tr>
+<tr>
+<td class='rowlabel'>Hispanic/Latino</td>
+<td>896 (64.9%)</td>
+</tr>
+<tr>
+<td class='rowlabel'>Other</td>
+<td>8 (0.6%)</td>
+</tr>
+<tr>
+<td class='rowlabel'>Unknown</td>
+<td>1 (0.1%)</td>
+</tr>
+<tr>
+<td class='rowlabel'>White</td>
+<td>119 (8.6%)</td>
+</tr>
+<tr>
+<td class='rowlabel lastrow'>Missing</td>
+<td class='lastrow'>13 (0.9%)</td>
+</tr>
+<tr>
+<td class='rowlabel firstrow'><span class='varlabel'>factor(Language)</span></td>
+<td class='firstrow'></td>
+</tr>
+<tr>
+<td class='rowlabel'>Chinese/English</td>
+<td>14 (1.0%)</td>
+</tr>
+<tr>
+<td class='rowlabel'>English</td>
+<td>568 (41.2%)</td>
+</tr>
+<tr>
+<td class='rowlabel lastrow'>Spanish</td>
+<td class='lastrow'>798 (57.8%)</td>
+</tr>
+<tr>
+<td class='rowlabel firstrow'><span class='varlabel'>factor(Education)</span></td>
+<td class='firstrow'></td>
+</tr>
+<tr>
+<td class='rowlabel'>none</td>
+<td>1 (0.1%)</td>
+</tr>
+<tr>
+<td class='rowlabel'>1-08</td>
+<td>343 (24.9%)</td>
+</tr>
+<tr>
+<td class='rowlabel'>9-11</td>
+<td>256 (18.6%)</td>
+</tr>
+<tr>
+<td class='rowlabel'>High School GED</td>
+<td>285 (20.7%)</td>
+</tr>
+<tr>
+<td class='rowlabel'>Some College</td>
+<td>218 (15.8%)</td>
+</tr>
+<tr>
+<td class='rowlabel'>College</td>
+<td>276 (20.0%)</td>
+</tr>
+<tr>
+<td class='rowlabel lastrow'>Missing</td>
+<td class='lastrow'>1 (0.1%)</td>
+</tr>
+<tr>
+<td class='rowlabel firstrow'><span class='varlabel'>factor(Insurance)</span></td>
+<td class='firstrow'></td>
+</tr>
+<tr>
+<td class='rowlabel'>MAP</td>
+<td>160 (11.6%)</td>
+</tr>
+<tr>
+<td class='rowlabel'>Medicaid</td>
+<td>147 (10.7%)</td>
+</tr>
+<tr>
+<td class='rowlabel'>MediCARE</td>
+<td>165 (12.0%)</td>
+</tr>
+<tr>
+<td class='rowlabel'>None</td>
+<td>371 (26.9%)</td>
+</tr>
+<tr>
+<td class='rowlabel'>Other</td>
+<td>245 (17.8%)</td>
+</tr>
+<tr>
+<td class='rowlabel'>Private insurance</td>
+<td>239 (17.3%)</td>
+</tr>
+<tr>
+<td class='rowlabel lastrow'>Missing</td>
+<td class='lastrow'>53 (3.8%)</td>
+</tr>
+<tr>
+<td class='rowlabel firstrow'><span class='varlabel'>factor(Medical)</span></td>
+<td class='firstrow'></td>
+</tr>
+<tr>
+<td class='rowlabel'>CommUnityCare</td>
+<td>344 (24.9%)</td>
+</tr>
+<tr>
+<td class='rowlabel'>Doctor's Office</td>
+<td>363 (26.3%)</td>
+</tr>
+<tr>
+<td class='rowlabel'>El Buen Samaritano</td>
+<td>93 (6.7%)</td>
+</tr>
+<tr>
+<td class='rowlabel'>Emergency Room</td>
+<td>23 (1.7%)</td>
+</tr>
+<tr>
+<td class='rowlabel'>Lone Star Circle of Care</td>
+<td>49 (3.6%)</td>
+</tr>
+<tr>
+<td class='rowlabel'>No regular place of care</td>
+<td>117 (8.5%)</td>
+</tr>
+<tr>
+<td class='rowlabel'>Other</td>
+<td>131 (9.5%)</td>
+</tr>
+<tr>
+<td class='rowlabel'>People's Community Clinic</td>
+<td>152 (11.0%)</td>
+</tr>
+<tr>
+<td class='rowlabel'>Seton Clinics</td>
+<td>54 (3.9%)</td>
+</tr>
+<tr>
+<td class='rowlabel lastrow'>Missing</td>
+<td class='lastrow'>54 (3.9%)</td>
+</tr>
+</tbody>
+</table>
+</div>
+<p>The vast majority of participants included in the dataset (80.4%) are women. On average, participants are 49 (SD = 15.1). More than half (64.9%) of participants are Hispanic/Latino and the majority (57.8%) speak Spanish as their first language. More than one-quarter (26.9%) of participants are uninsured and about one-fifth (22.7%) are on MediCARE or Medicaid. CommUnity Care (24.9%) and Doctor’s Offices (26.3%) are the most common medical homes of participants.</p>
+</div>
+<div id="presence-of-pre-existing-medical-conditionscomorbiditieshealth-risk-factors" class="section level1">
+<h1>Presence of Pre-Existing Medical Conditions/Comorbidities/health risk-factors</h1>
+<pre class="r"><code>health_table  </code></pre>
+<div class="Rtable1"><table class="Rtable1">
+<thead>
+<tr>
+<th class='rowlabel firstrow lastrow'></th>
+<th class='firstrow lastrow'><span class='stratlabel'>Overall<br><span class='stratn'>(N=1380)</span></span></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td class='rowlabel firstrow'><span class='varlabel'>factor(CVD)</span></td>
+<td class='firstrow'></td>
+</tr>
+<tr>
+<td class='rowlabel'>Yes</td>
+<td>104 (7.5%)</td>
+</tr>
+<tr>
+<td class='rowlabel'>No</td>
+<td>1243 (90.1%)</td>
+</tr>
+<tr>
+<td class='rowlabel lastrow'>Missing</td>
+<td class='lastrow'>33 (2.4%)</td>
+</tr>
+<tr>
+<td class='rowlabel firstrow'><span class='varlabel'>factor(Hypertension)</span></td>
+<td class='firstrow'></td>
+</tr>
+<tr>
+<td class='rowlabel'>Yes</td>
+<td>499 (36.2%)</td>
+</tr>
+<tr>
+<td class='rowlabel'>No</td>
+<td>852 (61.7%)</td>
+</tr>
+<tr>
+<td class='rowlabel lastrow'>Missing</td>
+<td class='lastrow'>29 (2.1%)</td>
+</tr>
+<tr>
+<td class='rowlabel firstrow'><span class='varlabel'>factor(Tobacco)</span></td>
+<td class='firstrow'></td>
+</tr>
+<tr>
+<td class='rowlabel'>Yes</td>
+<td>91 (6.6%)</td>
+</tr>
+<tr>
+<td class='rowlabel'>No</td>
+<td>1219 (88.3%)</td>
+</tr>
+<tr>
+<td class='rowlabel lastrow'>Missing</td>
+<td class='lastrow'>70 (5.1%)</td>
+</tr>
+</tbody>
+</table>
+</div>
+<p>The vast majority of participants do not have health risk factors/pre-existing conditions that may influence PAID scale score. Very few participants (7.5%) have cardiovascular disease (CVD), less than one-tenth (6.6%) smoke, and less than one-half (36.2%) report having hypertension.</p>
+<div id="diet-and-exercise" class="section level2">
+<h2>Diet and Exercise</h2>
+<pre class="r"><code>(food_measure + carbs_count) / (fruits_freq + sugar_sweet)</code></pre>
+<p><img src="Exploratory_Analyses_files/figure-html/unnamed-chunk-9-1.png" width="90%" /></p>
+<p>Participants with and without diabetes tended to perform relatively similarly on dietary factors associated with diabetes management. While the majority of participants consume 3-4 servings of fruits/vegetables per week, a very small proportion of participants measures their food or counts carbohydrates more than once per week. The majority of participants consume 0-1 sugar-sweetened beverages every week.</p>
+<pre class="r"><code>exercise_diabetes</code></pre>
+<p><img src="Exploratory_Analyses_files/figure-html/unnamed-chunk-10-1.png" width="90%" /></p>
+</div>
+<div id="diabetes-knowledge" class="section level2">
+<h2>Diabetes Knowledge</h2>
+<p>Participants who had never received diabetes education in the past were more likely to self-report their knowledge of diabetes management as “poor.” A larger proportion of participants who had received previous diabetes education reported having “good” knowledge of diabetes management as compared to those who had not had previous diabetes education.</p>
+</div>
+<div id="predictive-model-of-paid-scale-scores" class="section level2">
+<h2>Predictive Model of PAID Scale Scores</h2>
+<p>I used a backwards stepwise regression approach to determine which predictors drive Problem Area in Diabetes (PAID) Scale Score. A full description of my methods can be found in the “Complete Report” tab.</p>
+<p>After excluding variables that were not contributing significantly to the model, I found that high blood pressure, insurance category, education level, and weekly servings of fruits/vegetables are significantly associated with PAID scale scores. These variables were used to construct my final model.</p>
+<pre class="r"><code>summary(paid_model10)</code></pre>
+<pre><code>## 
+## Call:
+## lm(formula = problem_area_in_diabetes_paid_scale_score ~ insurance_category + 
+##     education_level + high_blood_pressure_yes_no + factor_fruits, 
+##     data = measure_austin)
+## 
+## Residuals:
+##     Min      1Q  Median      3Q     Max 
+## -55.751 -19.546   0.185  18.016  71.775 
+## 
+## Coefficients:
+##                                     Estimate Std. Error t value Pr(&gt;|t|)    
+## (Intercept)                          71.9414     5.6750  12.677  &lt; 2e-16 ***
+## insurance_categoryMedicaid          -12.1214     4.5171  -2.683  0.00754 ** 
+## insurance_categoryMediCARE           -6.4034     4.3192  -1.483  0.13884    
+## insurance_categoryNone               -4.9238     4.0598  -1.213  0.22579    
+## insurance_categoryOther              -2.3489     4.2861  -0.548  0.58393    
+## insurance_categoryPrivate insurance  -3.6903     4.2970  -0.859  0.39087    
+## education_level9-11                  -0.3204     3.6783  -0.087  0.93063    
+## education_levelCollege              -18.7921     3.4347  -5.471 7.17e-08 ***
+## education_levelHigh School GED      -14.0495     3.2798  -4.284 2.22e-05 ***
+## education_levelSome College         -18.7982     3.5359  -5.316 1.62e-07 ***
+## high_blood_pressure_yes_noYes        -6.5702     2.2648  -2.901  0.00389 ** 
+## factor_fruits2-3                    -15.2252     5.1431  -2.960  0.00322 ** 
+## factor_fruits3-4                     -7.4403     4.8315  -1.540  0.12422    
+## factor_fruits5 or more              -16.9441     6.3265  -2.678  0.00765 ** 
+## factor_fruitsNot Sure                -5.7953     8.7118  -0.665  0.50623    
+## ---
+## Signif. codes:  0 &#39;***&#39; 0.001 &#39;**&#39; 0.01 &#39;*&#39; 0.05 &#39;.&#39; 0.1 &#39; &#39; 1
+## 
+## Residual standard error: 24.28 on 485 degrees of freedom
+##   (880 observations deleted due to missingness)
+## Multiple R-squared:  0.1976, Adjusted R-squared:  0.1744 
+## F-statistic: 8.529 on 14 and 485 DF,  p-value: &lt; 2.2e-16</code></pre>
+<p>Education emerged as a significant predictor of low PAID scale score: participants with a high school GED, some college, or a college degree had, on average, PAID scores that were 14.05, 18.80, and 18.79 points lower, respectively, than those with 1-08 years of schooling.</p>
+<p>Surprisingly, people with high blood pressure have significantly lower PAID scale scores than those with normal or low blood pressure. This may reflect increased access to care and education among people managing more than one condition concurrently.</p>
+<p>Fruit and vegetble consumption was the only significant dietary predictor of PAID scale score. Participants who consumed 2-3 servings per week had, on average, PAID scale scores that were 15.23 points lower than participants who did not consume any fruits or vegetables. People who consumed 5 or more servings per week had scores that were, on average, 16.94 points lower than those who consumed 0 servings. This suggests that increasing fruit and vegetable consumption is a modifiable factor that can have significant impacts on diabetes management.</p>
+<p>Somewhat surprisingly, participants using Medicaid as their primary insurance have, on average, a PAID scale score that is 12.12 points lower compared to people using MAP insurance. Additional research is required to understand this link. It is possible that the population of people on Medicaid are younger, on average, than those using other forms of insurance, which could drive better PAID scale scores.</p>
+</div>
+<div id="conclusions" class="section level2">
+<h2>Conclusions</h2>
+<p>This analysis demonstrates that fruit and vegetable consumption is a modifiable lifestyle factor that can significantly improve management of diabetes.</p>
+<p>Future education courses should place additional emphasis on healthy food consumption as opposed to food measurement/carbohydrate counting. Healthy recipes, cooking classes, and peer support for good nutrition may increase servings of fruits and vegetables among people managing diabetes.</p>
+</div>
+</div>
+
+
+
+
+</div>
+
+<script>
+
+// add bootstrap table styles to pandoc tables
+function bootstrapStylePandocTables() {
+  $('tr.header').parent('thead').parent('table').addClass('table table-condensed');
+}
+$(document).ready(function () {
+  bootstrapStylePandocTables();
+});
+
+
+</script>
+
+<!-- tabsets -->
+
+<script>
+$(document).ready(function () {
+  window.buildTabsets("TOC");
+});
+
+$(document).ready(function () {
+  $('.tabset-dropdown > .nav-tabs > li').click(function () {
+    $(this).parent().toggleClass('nav-tabs-open')
+  });
+});
+</script>
+
+<!-- code folding -->
+<script>
+$(document).ready(function () {
+  window.initializeCodeFolding("hide" === "show");
+});
+</script>
+
+
+<!-- dynamically load mathjax for compatibility with self-contained -->
+<script>
+  (function () {
+    var script = document.createElement("script");
+    script.type = "text/javascript";
+    script.src  = "https://mathjax.rstudio.com/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML";
+    document.getElementsByTagName("head")[0].appendChild(script);
+  })();
+</script>
+
+</body>
+</html>
